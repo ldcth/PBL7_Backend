@@ -90,8 +90,8 @@ def create_graph_by_lessons(dataset, grade, lesson):
                 G.add_edge(node_1, node_2, title=relationship, weight=4)
 
                 # Thêm edges từ node cha đến các node của bài
-                G.add_edge(lesson_node, node_1, title=f"Trong bài {lesson}", weight=2)
-                G.add_edge(lesson_node, node_2, title=f"Trong bài {lesson}", weight=2)
+                G.add_edge(lesson_node, node_1, title=f"Trong bài {lesson}", weight=1)
+                G.add_edge(lesson_node, node_2, title=f"Trong bài {lesson}", weight=1)
 
    
     # Tạo PyVis network từ đồ thị
@@ -101,6 +101,9 @@ def create_graph_by_lessons(dataset, grade, lesson):
     # Bật mũi tên trên các cạnh
     for edge in net.edges:
         edge['arrows'] = 'to'
+        edge['width'] = 1 
+        edge['arrowStrikethrough'] = False
+        edge['arrowSize'] = 0.3
 
     # Tùy chỉnh PyVis
     net.show_buttons()
