@@ -22,4 +22,4 @@ jobs:
               kill -9 $(cat pid_backend)
               rm pid_backend
             fi
-            nohup /root/miniconda3/envs/pbl7/bin/python app.py &
+            nohup /root/miniconda3/envs/pbl7/bin/python app.py > /dev/null 2>&1 &
