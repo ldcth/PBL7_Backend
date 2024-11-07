@@ -1,0 +1,167 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+             #config {
+                 float: left;
+                 width: 400px;
+                 height: 600px;
+             }
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+            <div id="config"></div>
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "purple", "id": "11_b\u00e0i_1", "label": "B\u00e0i 1", "shape": "dot", "size": 20}, {"color": "lightblue", "id": 2145, "label": "N\u01b0\u1edbc Nh\u1eadt B\u1ea3n", "shape": "dot", "size": 15, "title": "N\u01b0\u1edbc Nh\u1eadt B\u1ea3n"}, {"color": "lightblue", "id": 1001, "label": "cu\u1ed9c c\u00e1ch m\u1ea1ng t\u01b0 s\u1ea3n", "shape": "dot", "size": 15, "title": "cu\u1ed9c c\u00e1ch m\u1ea1ng t\u01b0 s\u1ea3n"}, {"color": "lightblue", "id": 2146, "label": "ph\u00e1t tri\u1ec3n theo con \u0111\u01b0\u1eddng c\u1ee7a c\u00e1c n\u01b0\u1edbc ph\u01b0\u01a1ng T\u00e2y", "shape": "dot", "size": 15, "title": "ph\u00e1t tri\u1ec3n theo con \u0111\u01b0\u1eddng c\u1ee7a c\u00e1c n\u01b0\u1edbc ph\u01b0\u01a1ng T\u00e2y"}, {"color": "lightblue", "id": 2147, "label": "\u0111\u1ebf qu\u1ed1c duy nh\u1ea5t \u1edf ch\u00e2u \u00c1", "shape": "dot", "size": 15, "title": "\u0111\u1ebf qu\u1ed1c duy nh\u1ea5t \u1edf ch\u00e2u \u00c1"}, {"color": "lightblue", "id": 2148, "label": "Tokugawa", "shape": "dot", "size": 15, "title": "Tokugawa"}, {"color": "lightblue", "id": 2149, "label": "t\u00ecnh tr\u1ea1ng kh\u1ee7ng ho\u1ea3ng suy y\u1ebfu nghi\u00eam tr\u1ecdng", "shape": "dot", "size": 15, "title": "t\u00ecnh tr\u1ea1ng kh\u1ee7ng ho\u1ea3ng suy y\u1ebfu nghi\u00eam tr\u1ecdng"}, {"color": "lightblue", "id": 2150, "label": "h\u01a1n 200 n\u0103m", "shape": "dot", "size": 15, "title": "h\u01a1n 200 n\u0103m"}, {"color": "lightblue", "id": 2151, "label": "nh\u1ecbn m\u00e2u thu\u1eabn \u1edf t\u1ea5t c\u1ea3 c\u00e1c l\u0129nh v\u1ef1c kinh t\u1ebf, ch\u00ednh tr\u1ecb, x\u00e3 h\u1ed9i", "shape": "dot", "size": 15, "title": "nh\u1ecbn m\u00e2u thu\u1eabn \u1edf t\u1ea5t c\u1ea3 c\u00e1c l\u0129nh v\u1ef1c kinh t\u1ebf, ch\u00ednh tr\u1ecb, x\u00e3 h\u1ed9i"}, {"color": "lightblue", "id": 2152, "label": "quan h\u1ec7 s\u1ea3n xu\u1ea5t phong ki\u1ebfn l\u1ea1c h\u1eadu", "shape": "dot", "size": 15, "title": "quan h\u1ec7 s\u1ea3n xu\u1ea5t phong ki\u1ebfn l\u1ea1c h\u1eadu"}, {"color": "lightblue", "id": 186, "label": "n\u00f4ng d\u00e2n", "shape": "dot", "size": 15, "title": "n\u00f4ng d\u00e2n"}, {"color": "lightblue", "id": 2153, "label": "li\u00ean ti\u1ebfp x\u1ea3y ra", "shape": "dot", "size": 15, "title": "li\u00ean ti\u1ebfp x\u1ea3y ra"}, {"color": "lightblue", "id": 2154, "label": "kinh t\u1ebf h\u00e0ng h\u00f3a", "shape": "dot", "size": 15, "title": "kinh t\u1ebf h\u00e0ng h\u00f3a"}, {"color": "lightblue", "id": 139, "label": "c\u00f4ng tr\u01b0\u1eddng th\u1ee7 c\u00f4ng", "shape": "dot", "size": 15, "title": "c\u00f4ng tr\u01b0\u1eddng th\u1ee7 c\u00f4ng"}, {"color": "lightblue", "id": 2155, "label": "m\u00f4 h\u00ecnh kinh t\u1ebf t\u01b0 b\u1ea3n ch\u1ee7 ngh\u0129a", "shape": "dot", "size": 15, "title": "m\u00f4 h\u00ecnh kinh t\u1ebf t\u01b0 b\u1ea3n ch\u1ee7 ngh\u0129a"}, {"color": "lightblue", "id": 2156, "label": "ch\u1ebf \u0111\u1ed9 \u0111\u1eb3ng c\u1ea5p t\u00e2ng l\u1edbp \u0110aimyo", "shape": "dot", "size": 15, "title": "ch\u1ebf \u0111\u1ed9 \u0111\u1eb3ng c\u1ea5p t\u00e2ng l\u1edbp \u0110aimyo"}, {"color": "lightblue", "id": 2157, "label": "v\u00f9ng l\u00e3nh \u0111\u1ecba trong n\u01b0\u1edbc", "shape": "dot", "size": 15, "title": "v\u00f9ng l\u00e3nh \u0111\u1ecba trong n\u01b0\u1edbc"}, {"color": "lightblue", "id": 2158, "label": "quy\u1ec1n l\u1ef1c tuy\u1ec7t \u0111\u1ed1i trong l\u00e3nh \u0111\u1ecba c\u1ee7a h\u1ecd", "shape": "dot", "size": 15, "title": "quy\u1ec1n l\u1ef1c tuy\u1ec7t \u0111\u1ed1i trong l\u00e3nh \u0111\u1ecba c\u1ee7a h\u1ecd"}, {"color": "lightblue", "id": 2159, "label": "\u0111\u1ecba v\u1ecb c\u1ee7a Samurai", "shape": "dot", "size": 15, "title": "\u0111\u1ecba v\u1ecb c\u1ee7a Samurai"}, {"color": "lightblue", "id": 2160, "label": "l\u01b0\u01a1ng b\u1ed5ng", "shape": "dot", "size": 15, "title": "l\u01b0\u01a1ng b\u1ed5ng"}, {"color": "lightblue", "id": 2161, "label": "\u0111\u1eddi s\u1ed1ng", "shape": "dot", "size": 15, "title": "\u0111\u1eddi s\u1ed1ng"}, {"color": "lightblue", "id": 2162, "label": "mu\u1ed1n tham gia ho\u1ea1t \u0111\u1ed9ng th\u01b0\u01a1ng nghi\u1ec7p", "shape": "dot", "size": 15, "title": "mu\u1ed1n tham gia ho\u1ea1t \u0111\u1ed9ng th\u01b0\u01a1ng nghi\u1ec7p"}, {"color": "lightblue", "id": 2163, "label": "mu\u1ed1n tr\u1edf th\u00e0nh l\u1ef1c l\u01b0\u1ee3ng \u0111\u1ea5u tranh ch\u1ed1ng ch\u1ebf \u0111\u1ed9 phong ki\u1ebfn l\u1ed7i th\u1eddi", "shape": "dot", "size": 15, "title": "mu\u1ed1n tr\u1edf th\u00e0nh l\u1ef1c l\u01b0\u1ee3ng \u0111\u1ea5u tranh ch\u1ed1ng ch\u1ebf \u0111\u1ed9 phong ki\u1ebfn l\u1ed7i th\u1eddi"}, {"color": "lightblue", "id": 2164, "label": "ng\u01b0\u1eddi t\u01b0 s\u1ea3n c\u00f4ng th\u01b0\u01a1ng", "shape": "dot", "size": 15, "title": "ng\u01b0\u1eddi t\u01b0 s\u1ea3n c\u00f4ng th\u01b0\u01a1ng"}, {"color": "lightblue", "id": 1535, "label": "ch\u00ednh tr\u1ecb", "shape": "dot", "size": 15, "title": "ch\u00ednh tr\u1ecb"}, {"color": "lightblue", "id": 2165, "label": "giai c\u1ea5p phong ki\u1ebfn", "shape": "dot", "size": 15, "title": "giai c\u1ea5p phong ki\u1ebfn"}, {"color": "lightblue", "id": 2166, "label": "th\u1ecb d\u00e2n", "shape": "dot", "size": 15, "title": "th\u1ecb d\u00e2n"}, {"color": "lightblue", "id": 2022, "label": "phong ki\u1ebfn", "shape": "dot", "size": 15, "title": "phong ki\u1ebfn"}, {"color": "lightblue", "id": 2167, "label": "nh\u1eadt b\u1ea3n", "shape": "dot", "size": 15, "title": "nh\u1eadt b\u1ea3n"}, {"color": "lightblue", "id": 2168, "label": "t\u00ecnh h\u00ecnh nh\u1eadt b\u1ea3n", "shape": "dot", "size": 15, "title": "t\u00ecnh h\u00ecnh nh\u1eadt b\u1ea3n"}, {"color": "lightblue", "id": 2169, "label": "m\u1ea1c ph\u1ee7", "shape": "dot", "size": 15, "title": "m\u1ea1c ph\u1ee7"}, {"color": "lightblue", "id": 2170, "label": "tr\u01b0\u1edbc n\u0103m 1868", "shape": "dot", "size": 15, "title": "tr\u01b0\u1edbc n\u0103m 1868"}, {"color": "lightblue", "id": 2171, "label": "m\u1ef9", "shape": "dot", "size": 15, "title": "m\u1ef9"}, {"color": "lightblue", "id": 2172, "label": "n\u01b0\u1edbc ngo\u00e0i", "shape": "dot", "size": 15, "title": "n\u01b0\u1edbc ngo\u00e0i"}, {"color": "lightblue", "id": 2173, "label": "n\u0103m 1854", "shape": "dot", "size": 15, "title": "n\u0103m 1854"}, {"color": "lightblue", "id": 2174, "label": "shimoda v\u00e0 hakodate", "shape": "dot", "size": 15, "title": "shimoda v\u00e0 hakodate"}, {"color": "lightblue", "id": 2175, "label": "ng\u01b0\u1eddi m\u1ef9", "shape": "dot", "size": 15, "title": "ng\u01b0\u1eddi m\u1ef9"}, {"color": "lightblue", "id": 2176, "label": "hakodate", "shape": "dot", "size": 15, "title": "hakodate"}, {"color": "lightblue", "id": 2177, "label": "shimoda", "shape": "dot", "size": 15, "title": "shimoda"}, {"color": "lightblue", "id": 2178, "label": "Nh\u1eadt ho\u00e0ng", "shape": "dot", "size": 15, "title": "Nh\u1eadt ho\u00e0ng"}, {"color": "lightblue", "id": 2179, "label": "th\u1ee7 ti\u00eau ch\u1ebf \u0111\u1ed9 M\u1ea1c ph\u1ee7", "shape": "dot", "size": 15, "title": "th\u1ee7 ti\u00eau ch\u1ebf \u0111\u1ed9 M\u1ea1c ph\u1ee7"}, {"color": "lightblue", "id": 2180, "label": "ch\u1ebf \u0111\u1ed9 M\u1ea1c ph\u1ee7", "shape": "dot", "size": 15, "title": "ch\u1ebf \u0111\u1ed9 M\u1ea1c ph\u1ee7"}, {"color": "lightblue", "id": 2181, "label": "ch\u1ebf \u0111\u1ed9 qu\u00e2n ch\u1ee7 l\u1eadp hi\u1ebfn", "shape": "dot", "size": 15, "title": "ch\u1ebf \u0111\u1ed9 qu\u00e2n ch\u1ee7 l\u1eadp hi\u1ebfn"}, {"color": "lightblue", "id": 2182, "label": "Hi\u1ebfn ph\u00e1p m\u1edbi", "shape": "dot", "size": 15, "title": "Hi\u1ebfn ph\u00e1p m\u1edbi"}, {"color": "lightblue", "id": 2183, "label": "ch\u00ednh ph\u1ee7 m\u1edbi", "shape": "dot", "size": 15, "title": "ch\u00ednh ph\u1ee7 m\u1edbi"}, {"color": "lightblue", "id": 2184, "label": "t\u1ea7ng l\u1edbp qu\u00fd t\u1ed9c t\u01b0 s\u1ea3n h\u00f3a", "shape": "dot", "size": 15, "title": "t\u1ea7ng l\u1edbp qu\u00fd t\u1ed9c t\u01b0 s\u1ea3n h\u00f3a"}, {"color": "lightblue", "id": 2185, "label": "Nh\u1eadt B\u1ea3n", "shape": "dot", "size": 15, "title": "Nh\u1eadt B\u1ea3n"}, {"color": "lightblue", "id": 1552, "label": "gi\u1edbi c\u1ea7m quy\u1ec1n", "shape": "dot", "size": 15, "title": "gi\u1edbi c\u1ea7m quy\u1ec1n"}, {"color": "lightblue", "id": 2186, "label": "\u0110\u00e0i Loan", "shape": "dot", "size": 15, "title": "\u0110\u00e0i Loan"}, {"color": "lightblue", "id": 2187, "label": "Trung-Nh\u1eadt", "shape": "dot", "size": 15, "title": "Trung-Nh\u1eadt"}, {"color": "lightblue", "id": 2188, "label": "\u0110\u1ebf qu\u1ed1c - Chi\u1ebfn tranh Nga-Nh\u1eadt", "shape": "dot", "size": 15, "title": "\u0110\u1ebf qu\u1ed1c - Chi\u1ebfn tranh Nga-Nh\u1eadt"}, {"color": "lightblue", "id": 2189, "label": "s\u1ee9c m\u1ea1nh kinh t\u1ebf qu\u00e2n s\u1ef1 v\u00e0 ch\u00ednh tr\u1ecb", "shape": "dot", "size": 15, "title": "s\u1ee9c m\u1ea1nh kinh t\u1ebf qu\u00e2n s\u1ef1 v\u00e0 ch\u00ednh tr\u1ecb"}, {"color": "lightblue", "id": 2190, "label": "s\u1ee9c m\u1ea1nh qu\u00e2n s\u1ef1", "shape": "dot", "size": 15, "title": "s\u1ee9c m\u1ea1nh qu\u00e2n s\u1ef1"}, {"color": "lightblue", "id": 2191, "label": "quy\u1ec1n s\u1edf h\u1eefu ru\u1ed9ng \u0111\u1ea5t phong ki\u1ebfn", "shape": "dot", "size": 15, "title": "quy\u1ec1n s\u1edf h\u1eefu ru\u1ed9ng \u0111\u1ea5t phong ki\u1ebfn"}, {"color": "lightblue", "id": 2192, "label": "\u01b0u th\u1ebf ch\u00ednh tr\u1ecb", "shape": "dot", "size": 15, "title": "\u01b0u th\u1ebf ch\u00ednh tr\u1ecb"}, {"color": "lightblue", "id": 2193, "label": "t\u1ed1c \u0111\u1ed9 ph\u00e1t tri\u1ec3n kinh t\u1ebf", "shape": "dot", "size": 15, "title": "t\u1ed1c \u0111\u1ed9 ph\u00e1t tri\u1ec3n kinh t\u1ebf"}, {"color": "lightblue", "id": 1419, "label": "giai \u0111o\u1ea1n \u0111\u1ebf qu\u1ed1c ch\u1ee7 ngh\u0129a", "shape": "dot", "size": 15, "title": "giai \u0111o\u1ea1n \u0111\u1ebf qu\u1ed1c ch\u1ee7 ngh\u0129a"}, {"color": "lightblue", "id": 2194, "label": "Cu\u1ed9c Duy T\u00e2n Minh tr\u1ecb", "shape": "dot", "size": 15, "title": "Cu\u1ed9c Duy T\u00e2n Minh tr\u1ecb"}, {"color": "lightblue", "id": 2195, "label": "\u0110\u1ebf qu\u1ed1c Nh\u1eadt B\u1ea3n", "shape": "dot", "size": 15, "title": "\u0110\u1ebf qu\u1ed1c Nh\u1eadt B\u1ea3n"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2145, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 1001, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2146, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2147, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2148, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2149, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2150, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2151, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2152, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 186, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2153, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2154, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 139, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2155, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2156, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2157, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2158, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2159, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2160, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2161, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2162, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2163, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2164, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 1535, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2165, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2166, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2022, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2167, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2168, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2169, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2170, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2171, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2172, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2173, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2174, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2175, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2176, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2177, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2178, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2179, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2180, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2181, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2182, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2183, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2184, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2185, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 1552, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2186, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2187, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2188, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2189, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2190, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2191, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2192, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2193, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 1419, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2194, "width": 2}, {"arrows": "to", "from": "11_b\u00e0i_1", "title": "Trong b\u00e0i 1", "to": 2195, "width": 2}, {"arrows": "to", "from": 2145, "title": "c\u00f3 \u00fd ngh\u0129a nh\u01b0", "to": 1001, "width": 4}, {"arrows": "to", "from": 2145, "title": "\u0111\u01b0a", "to": 2146, "width": 4}, {"arrows": "to", "from": 2145, "title": "tr\u1edf th\u00e0nh", "to": 2147, "width": 4}, {"arrows": "to", "from": 2145, "title": "ch\u1ee9a \u0111\u1ef1ng", "to": 2151, "width": 4}, {"arrows": "to", "from": 2145, "title": "d\u1ef1b", "to": 2152, "width": 4}, {"arrows": "to", "from": 2145, "title": "b\u00f3c l\u1ed9t", "to": 186, "width": 4}, {"arrows": "to", "from": 2145, "title": "m\u1ea5t m\u00f9a", "to": 2153, "width": 4}, {"arrows": "to", "from": 2145, "title": "ph\u00e1t tri\u1ec3n", "to": 2154, "width": 4}, {"arrows": "to", "from": 2145, "title": "xu\u1ea5t hi\u1ec7n", "to": 139, "width": 4}, {"arrows": "to", "from": 2145, "title": "ph\u00e1t tri\u1ec3n", "to": 2155, "width": 4}, {"arrows": "to", "from": 2145, "title": "duy tr\u00ec", "to": 2156, "width": 4}, {"arrows": "to", "from": 2145, "title": "qu\u1ea3n l\u00ed", "to": 2157, "width": 4}, {"arrows": "to", "from": 2145, "title": "h\u1eefu l\u1ef1c tuy\u1ec7t \u0111\u1ed1i", "to": 2158, "width": 4}, {"arrows": "to", "from": 2145, "title": "suy gi\u1ea3m", "to": 2159, "width": 4}, {"arrows": "to", "from": 2145, "title": "th\u1ea5t th\u01b0\u1eddng", "to": 2160, "width": 4}, {"arrows": "to", "from": 2145, "title": "kh\u00f3 kh\u0103n", "to": 2161, "width": 4}, {"arrows": "to", "from": 2145, "title": "t\u1ea3n \u0111\u1ecba", "to": 2162, "width": 4}, {"arrows": "to", "from": 2145, "title": "m\u1edf x\u01b0\u1edfng th\u1ee7 c\u00f4ng", "to": 2163, "width": 4}, {"arrows": "to", "from": 1001, "title": "c\u00f3 \u00fd ngh\u0129a nh\u01b0", "to": 2194, "width": 4}, {"arrows": "to", "from": 2148, "title": "\u0111\u1ee9ng tr\u01b0\u1edbc", "to": 2149, "width": 4}, {"arrows": "to", "from": 2148, "title": "th\u1ed1ng tr\u1ecb", "to": 2150, "width": 4}, {"arrows": "to", "from": 186, "title": "b\u1ecb b\u00f3c l\u1ed9t b\u1edfi", "to": 2165, "width": 4}, {"arrows": "to", "from": 2164, "title": "\u0111\u1ea1t \u0111\u01b0\u1ee3c quy\u1ec1n l\u1ef1c", "to": 1535, "width": 4}, {"arrows": "to", "from": 2166, "title": "b\u1ecb kh\u1ed1ng ch\u1ebf b\u1edfi", "to": 2022, "width": 4}, {"arrows": "to", "from": 2167, "title": "\u0111\u1ee9ng tr\u01b0\u1edbc s\u1ef1 l\u1ef1a ch\u1ecdn", "to": 2168, "width": 4}, {"arrows": "to", "from": 2167, "title": "m\u1edf c\u1eeda", "to": 2173, "width": 4}, {"arrows": "to", "from": 2167, "title": "m\u1edf c\u1eeda", "to": 2174, "width": 4}, {"arrows": "to", "from": 2167, "title": "m\u1edf c\u1eeda", "to": 2175, "width": 4}, {"arrows": "to", "from": 2167, "title": "m\u1edf c\u1eeda", "to": 2171, "width": 4}, {"arrows": "to", "from": 2167, "title": "m\u1edf c\u1eeda", "to": 2176, "width": 4}, {"arrows": "to", "from": 2167, "title": "m\u1edf c\u1eeda", "to": 2177, "width": 4}, {"arrows": "to", "from": 2169, "title": "g\u1eb7p kh\u1ee7ng ho\u1ea3ng nghi\u00eam tr\u1ecdng", "to": 2170, "width": 4}, {"arrows": "to", "from": 2171, "title": "\u0111em \u00e1p l\u1ef1c qu\u00e2n s\u1ef1", "to": 2172, "width": 4}, {"arrows": "to", "from": 2178, "title": "tuy\u00ean b\u1ed1", "to": 2179, "width": 4}, {"arrows": "to", "from": 2178, "title": "th\u1ee7 ti\u00eau", "to": 2180, "width": 4}, {"arrows": "to", "from": 2178, "title": "th\u00e0nh l\u1eadp", "to": 2183, "width": 4}, {"arrows": "to", "from": 2181, "title": "\u0111\u01b0\u1ee3c thi\u1ebft l\u1eadp", "to": 2182, "width": 4}, {"arrows": "to", "from": 2183, "title": "\u0111\u00f3ng vai tr\u00f2 quan tr\u1ecdng", "to": 2184, "width": 4}, {"arrows": "to", "from": 2185, "title": "th\u1ef1c h\u00e0nh ch\u00ednh s\u00e1ch", "to": 1552, "width": 4}, {"arrows": "to", "from": 2185, "title": "x\u00e2m l\u01b0\u1ee3c", "to": 2186, "width": 4}, {"arrows": "to", "from": 2185, "title": "x\u00e2m l\u01b0\u1ee3c", "to": 2187, "width": 4}, {"arrows": "to", "from": 2185, "title": "x\u00e2m l\u01b0\u1ee3c", "to": 2188, "width": 4}, {"arrows": "to", "from": 2185, "title": "t\u1ea1o", "to": 2189, "width": 4}, {"arrows": "to", "from": 2185, "title": "t\u1ea1o", "to": 2190, "width": 4}, {"arrows": "to", "from": 2185, "title": "t\u00e1i c\u1ea5u tr\u00fac", "to": 2191, "width": 4}, {"arrows": "to", "from": 2185, "title": "duy tr\u00ec", "to": 2192, "width": 4}, {"arrows": "to", "from": 2185, "title": "th\u00fac \u0111\u1ea9y", "to": 2193, "width": 4}, {"arrows": "to", "from": 2185, "title": "\u0111\u00e3 chuy\u1ec3n sang", "to": 1419, "width": 4}, {"arrows": "to", "from": 2194, "title": "b\u00e0nh tr\u01b0\u1edbng", "to": 2195, "width": 4}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": true
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": false,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+                  // if this network requires displaying the configure window,
+                  // put it in its div
+                  options.configure["container"] = document.getElementById("config");
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

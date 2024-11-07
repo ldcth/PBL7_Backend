@@ -1,0 +1,167 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+             #config {
+                 float: left;
+                 width: 400px;
+                 height: 600px;
+             }
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+            <div id="config"></div>
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "purple", "id": "10_b\u00e0i_2", "label": "B\u00e0i 2", "shape": "dot", "size": 20}, {"color": "lightblue", "id": 601, "label": "th\u00e0nh vi\u00ean", "shape": "dot", "size": 15, "title": "th\u00e0nh vi\u00ean"}, {"color": "lightblue", "id": 385, "label": "x\u00e3 h\u1ed9i", "shape": "dot", "size": 15, "title": "x\u00e3 h\u1ed9i"}, {"color": "lightblue", "id": 602, "label": "nguy\u00ean th\u1ee7y", "shape": "dot", "size": 15, "title": "nguy\u00ean th\u1ee7y"}, {"color": "lightblue", "id": 603, "label": "s\u1ef1 thay \u0111\u1ed5i nguy\u00ean th\u1ee7y", "shape": "dot", "size": 15, "title": "s\u1ef1 thay \u0111\u1ed5i nguy\u00ean th\u1ee7y"}, {"color": "lightblue", "id": 604, "label": "s\u1ee9c x\u00e3 h\u1ed9i nguy\u00ean th\u1ee7y", "shape": "dot", "size": 15, "title": "s\u1ee9c x\u00e3 h\u1ed9i nguy\u00ean th\u1ee7y"}, {"color": "lightblue", "id": 605, "label": "s\u1ef1 ph\u00e2n bi\u1ec7t gi\u00e0u ngh\u00e8o", "shape": "dot", "size": 15, "title": "s\u1ef1 ph\u00e2n bi\u1ec7t gi\u00e0u ngh\u00e8o"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "from": "10_b\u00e0i_2", "title": "Trong b\u00e0i 2", "to": 601, "width": 2}, {"arrows": "to", "from": "10_b\u00e0i_2", "title": "Trong b\u00e0i 2", "to": 385, "width": 2}, {"arrows": "to", "from": "10_b\u00e0i_2", "title": "Trong b\u00e0i 2", "to": 602, "width": 2}, {"arrows": "to", "from": "10_b\u00e0i_2", "title": "Trong b\u00e0i 2", "to": 603, "width": 2}, {"arrows": "to", "from": "10_b\u00e0i_2", "title": "Trong b\u00e0i 2", "to": 604, "width": 2}, {"arrows": "to", "from": "10_b\u00e0i_2", "title": "Trong b\u00e0i 2", "to": 605, "width": 2}, {"arrows": "to", "from": 601, "title": "c\u00f3 ch\u1ee9c ph\u1eadn", "to": 385, "width": 4}, {"arrows": "to", "from": 602, "title": "b\u1eaft \u0111\u1ea7u", "to": 603, "width": 4}, {"arrows": "to", "from": 602, "title": "b\u1ecb r\u1ea1n v\u1ee1", "to": 604, "width": 4}, {"arrows": "to", "from": 602, "title": "b\u1ecb r\u1ea1n v\u1ee1", "to": 605, "width": 4}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": true
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": false,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+                  // if this network requires displaying the configure window,
+                  // put it in its div
+                  options.configure["container"] = document.getElementById("config");
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

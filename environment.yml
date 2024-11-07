@@ -1,0 +1,5 @@
+name: history-be 
+channels:
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
+prefix: /Users/jasonle/miniconda3/envs/history-be 
