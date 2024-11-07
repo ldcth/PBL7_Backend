@@ -13,7 +13,12 @@ from database.finetune import Finetune
 from database.conversation import Conversations
 from database.content import Contents
 from utils.convert import custom_json_respone
-from services.crawl import Tracnghiem_Lichsu_url, Chitiet_HTML, handle, Test_Chitiet_HTML
+from services.crawl import (
+    Tracnghiem_Lichsu_url,
+    Chitiet_HTML,
+    handle,
+    Test_Chitiet_HTML,
+)
 from flask_cors import CORS
 from models.tranformer import testModel, model_api
 from models.finetuned import finetune_model
@@ -22,12 +27,18 @@ from models.top_k_graph import get_top_k_graph
 from models.graph import create_graph_by_lessons
 import math
 from flask_bcrypt import Bcrypt
-from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from flask_jwt_extended import (
+    JWTManager,
+    jwt_required,
+    create_access_token,
+    get_jwt_identity,
+)
+import os
 
 # app = Flask(__name__, static_folder='public', static_url_path='')
-app = Flask(__name__, static_folder='static')
+app = Flask(__name__, static_folder="static")
 
-app.config['SECRET_KEY'] = 'PBL7'
+app.config["SECRET_KEY"] = "PBL7"
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 CORS(app)
@@ -35,16 +46,22 @@ CORS(app)
 
 def crawl_data():
     urls_10 = Tracnghiem_Lichsu_url(
-        "https://vietjack.com/bai-tap-trac-nghiem-lich-su-10/index.jsp")
+        "https://vietjack.com/bai-tap-trac-nghiem-lich-su-10/index.jsp"
+    )
     urls_11 = Tracnghiem_Lichsu_url(
-        "https://vietjack.com/bai-tap-trac-nghiem-lich-su-11/index.jsp")
+        "https://vietjack.com/bai-tap-trac-nghiem-lich-su-11/index.jsp"
+    )
     urls_12 = Tracnghiem_Lichsu_url(
-        "https://vietjack.com/bai-tap-trac-nghiem-lich-su-12/index.jsp")
+        "https://vietjack.com/bai-tap-trac-nghiem-lich-su-12/index.jsp"
+    )
     urls = urls_10 + urls_11 + urls_12
     current_urls = Links().get_all_links()
     new_links_to_add = []
     for link in urls:
-        if link not in [existing_link['name'] for existing_link in current_urls] and len(new_links_to_add) < 1000:
+        if (
+            link not in [existing_link["name"] for existing_link in current_urls]
+            and len(new_links_to_add) < 1000
+        ):
             new_links_to_add.append(link)
 
     total_questions = 0
@@ -62,8 +79,13 @@ def crawl_data():
                         has_nan = True
                         break
                 if not has_nan:
-                    answer = Answers(data["question"], data["answers"],
-                                     data["explanation"], data["correct_answer"], ObjectId(link._id))
+                    answer = Answers(
+                        data["question"],
+                        data["answers"],
+                        data["explanation"],
+                        data["correct_answer"],
+                        ObjectId(link._id),
+                    )
                     answer.save_to_db()
                     questions.append(ObjectId(answer._id))
         link.questions = questions
@@ -91,6 +113,7 @@ def my_job():
                 print("crawl")
                 crawl_data()
 
+
 # schedule.every(10).seconds.do(my_job)
 
 
@@ -98,6 +121,7 @@ def schedule_thread():
     while True:
         schedule.run_pending()
         time.sleep(1)
+
 
 # schedule_t = threading.Thread(target=schedule_thread)
 # schedule_t.start()
@@ -107,8 +131,8 @@ def schedule_thread():
 @app.route("/")
 def home():
     try:
-        q = 'Việc Liên Xô chế tạo thành công bom nguyên tử có ý nghĩa gì ? A. Khẳng định vai trò to lớn của Liên Xô đối cách mạng thế giới. B. Đưa thế giới bước vào thời đại chiến tranh hạt nhân. C. Thế độc quyền vũ khí nguyên tử của Mĩ bị phá vỡ. D. Khiến Liên Xô trở thành nước đầu tiên sở hữu vũ khí nguyên tử.'
-        top_k = get_top_k(q,topk=15)
+        q = "Việc Liên Xô chế tạo thành công bom nguyên tử có ý nghĩa gì ? A. Khẳng định vai trò to lớn của Liên Xô đối cách mạng thế giới. B. Đưa thế giới bước vào thời đại chiến tranh hạt nhân. C. Thế độc quyền vũ khí nguyên tử của Mĩ bị phá vỡ. D. Khiến Liên Xô trở thành nước đầu tiên sở hữu vũ khí nguyên tử."
+        top_k = get_top_k(q, topk=15)
         print(top_k)
         return jsonify({"message": top_k})
     except Exception as e:
@@ -124,7 +148,7 @@ def get_data_hugging_face():
         return jsonify({"message": f"Lỗi khi kết nối đến MongoDB: {e}"}), 500
 
 
-@app.get('/api/test')
+@app.get("/api/test")
 def test():
     # handle()
     # urls_10 = Tracnghiem_Lichsu_url(
@@ -135,7 +159,7 @@ def test():
     return {}, 200
 
 
-@app.post('/api/auth/create')
+@app.post("/api/auth/create")
 def create_account():
     data = request.json
     user = Users()
@@ -145,51 +169,52 @@ def create_account():
     else:
         user.name = data["name"]
         user.email = data["email"]
-        hashed_password = bcrypt.generate_password_hash(
-            data["password"]).decode('utf-8')
+        hashed_password = bcrypt.generate_password_hash(data["password"]).decode(
+            "utf-8"
+        )
         user.password = hashed_password
         user.role = 1
         user.save_to_db()
         return jsonify(user.__dict__), 200
 
 
-@app.post('/api/auth/login')
+@app.post("/api/auth/login")
 def login():
     data = request.json
     user = Users()
     check = user.find_by_email(data["email"])
-    if (check):
+    if check:
         is_valid = bcrypt.check_password_hash(user.password, data["password"])
-        if (is_valid):
+        if is_valid:
             access_token = create_access_token(
-                identity=user.__dict__, expires_delta=timedelta(days=30))
-            return jsonify({
-                "user": user.__dict__,
-                "access_token": access_token
-            }), 200
+                identity=user.__dict__, expires_delta=timedelta(days=30)
+            )
+            return jsonify({"user": user.__dict__, "access_token": access_token}), 200
         else:
-            return jsonify({
-                "message": "Invalid email or password"
-            }), 401
+            return jsonify({"message": "Invalid email or password"}), 401
     else:
-        return jsonify({
-            "message": "Invalid email or password"
-        }), 401
+        return jsonify({"message": "Invalid email or password"}), 401
 
 
-@app.post('/api/crawl')
+@app.post("/api/crawl")
 def crawl():
     urls_10 = Tracnghiem_Lichsu_url(
-        "https://vietjack.com/bai-tap-trac-nghiem-lich-su-10/index.jsp")
+        "https://vietjack.com/bai-tap-trac-nghiem-lich-su-10/index.jsp"
+    )
     urls_11 = Tracnghiem_Lichsu_url(
-        "https://vietjack.com/bai-tap-trac-nghiem-lich-su-11/index.jsp")
+        "https://vietjack.com/bai-tap-trac-nghiem-lich-su-11/index.jsp"
+    )
     urls_12 = Tracnghiem_Lichsu_url(
-        "https://vietjack.com/bai-tap-trac-nghiem-lich-su-12/index.jsp")
+        "https://vietjack.com/bai-tap-trac-nghiem-lich-su-12/index.jsp"
+    )
     urls = urls_10 + urls_11 + urls_12
     current_urls = Links().get_all_links()
     new_links_to_add = []
     for link in urls:
-        if link not in [existing_link['name'] for existing_link in current_urls] and len(new_links_to_add) < 1000:
+        if (
+            link not in [existing_link["name"] for existing_link in current_urls]
+            and len(new_links_to_add) < 1000
+        ):
             new_links_to_add.append(link)
 
     total_questions = 0
@@ -207,8 +232,13 @@ def crawl():
                         has_nan = True
                         break
                 if not has_nan:
-                    answer = Answers(data["question"], data["answers"],
-                                     data["explanation"], data["correct_answer"], ObjectId(link._id))
+                    answer = Answers(
+                        data["question"],
+                        data["answers"],
+                        data["explanation"],
+                        data["correct_answer"],
+                        ObjectId(link._id),
+                    )
                     answer.save_to_db()
                     questions.append(ObjectId(answer._id))
         link.questions = questions
@@ -221,13 +251,14 @@ def crawl():
     return jsonify(record.__dict__), 200
 
 
-@app.get('/api/settings')
+@app.get("/api/settings")
 def get_setting():
     setting = Settings()
     res = setting.find_one()
     return jsonify(res), 200
 
-@app.post('/api/finetune')
+
+@app.post("/api/finetune")
 @jwt_required()
 def finetune():
     url = finetune_model()
@@ -235,7 +266,8 @@ def finetune():
     finetuned.save_to_db()
     return jsonify(finetuned.__dict__), 200
 
-@app.get('/api/finetune')
+
+@app.get("/api/finetune")
 @jwt_required()
 def get_finetune():
     finetuned = Finetune()
@@ -243,7 +275,7 @@ def get_finetune():
     return jsonify(data), 200
 
 
-@app.post('/api/settings')
+@app.post("/api/settings")
 def create_setting():
     # data = request.json
     # name = data['name']
@@ -254,7 +286,7 @@ def create_setting():
     return jsonify({"message": "Setting created successfully"}), 200
 
 
-@app.put('/api/settings')
+@app.put("/api/settings")
 def update_setting():
     setting = Settings()
     res = setting.find_one()
@@ -268,17 +300,17 @@ def update_setting():
     return jsonify({"message": "Setting update successfully"}), 200
 
 
-@app.get('/api/links')
+@app.get("/api/links")
 def get_links():
-    page = int(request.args.get('page', 0))
+    page = int(request.args.get("page", 0))
     # Số lượng bản ghi trên mỗi trang
-    per_page = int(request.args.get('per_page', 0))
+    per_page = int(request.args.get("per_page", 0))
     res = Links()
     result = res.get_all_links(page, per_page)
     return jsonify(result), 200
 
 
-@app.delete('/api/links/<id>')
+@app.delete("/api/links/<id>")
 def delete_link(id):
     link = Links()
     ans = Answers()
@@ -289,16 +321,12 @@ def delete_link(id):
             ans.delete_by_id(data)
         link.delete_by_id(id)
 
-        return jsonify({
-            "message": "Delete success"
-        }), 200
+        return jsonify({"message": "Delete success"}), 200
     except:
-        return jsonify({
-            "message": "Delete fail"
-        }), 400
+        return jsonify({"message": "Delete fail"}), 400
 
 
-@app.get('/api/links/<id>')
+@app.get("/api/links/<id>")
 def get_link_detail(id):
     try:
         res = Links()
@@ -306,14 +334,12 @@ def get_link_detail(id):
         if result:
             return jsonify(res.__dict__), 200
         else:
-            return jsonify({
-                "message": "Not found"
-            }), 404
+            return jsonify({"message": "Not found"}), 404
     except:
         return jsonify({}), 400
 
 
-@app.get('/api/links/<id>/answers')
+@app.get("/api/links/<id>/answers")
 def get_link_answers(id):
     link = Links()
     link.find_by_id(id)
@@ -321,7 +347,7 @@ def get_link_answers(id):
     return jsonify(answers), 200
 
 
-@app.post('/api/links/<id>/crawl')
+@app.post("/api/links/<id>/crawl")
 def crawl_answers_by_link(id):
     link = Links()
     link.find_by_id(id)
@@ -335,8 +361,13 @@ def crawl_answers_by_link(id):
                     has_nan = True
                     break
             if not has_nan:
-                answer = Answers(data["question"], data["answers"],
-                                 data["explanation"], data["correct_answer"], ObjectId(id))
+                answer = Answers(
+                    data["question"],
+                    data["answers"],
+                    data["explanation"],
+                    data["correct_answer"],
+                    ObjectId(id),
+                )
                 answer.save_to_db()
                 questions.append(ObjectId(answer._id))
 
@@ -344,36 +375,33 @@ def crawl_answers_by_link(id):
     link.save_to_db()
     return jsonify(answers), 200
 
-@app.get('/api/crawl')
+
+@app.get("/api/crawl")
 def get_crawl_his():
     record = Records()
     data = record.get_all()
     return jsonify(data), 200
 
 
-@app.get('/api/answers')
+@app.get("/api/answers")
 def get_answers():
     params = request.args
-    name = params.get('name')
+    name = params.get("name")
     setting = Settings()
     result = setting.find_by_id(name)
-    return jsonify({
-        "message": "success"
-    }), 200
+    return jsonify({"message": "success"}), 200
 
 
-@app.delete('/api/delete')
+@app.delete("/api/delete")
 def test_delete():
     link = Links()
     answers = Answers()
     link.delete_by_month()
     answers.delete_by_month()
-    return jsonify({
-        "message": "success"
-    }), 200
+    return jsonify({"message": "success"}), 200
 
 
-@app.get('/api/dashboard')
+@app.get("/api/dashboard")
 def get_infor_dashboard():
     link = Links()
     answer = Answers()
@@ -406,37 +434,35 @@ def get_infor_dashboard():
         last_month = answers_months[datetime.utcnow().month - 2]
         answers_grown = (cur_month - last_month) / last_month
 
-    return jsonify({
-        "contents": {
-            "feedback": total_content_feedback,
-            "no_feedback": total_content - total_content_feedback,
-            "type_feedback": type_feedback
-        },
-        "users": {
-            "total": total_users,
-            "growth": True,
-            "value": "0.0%"
-        },
-        "links": {
-            "total": total_links,
-            "growth": links_grown > 0,
-            "value": str(abs(round(links_grown * 100, 2))) + "%",
-            "per_months": links_months,
-            "data": links_data
-        },
-        "answers": {
-            "total": total_answers,
-            "growth": answers_grown > 0,
-            "value": str(abs(round(answers_grown * 100, 2))) + "%",
-            "per_months": answers_months
-        },
-        "pending": {
-            "total": total_pending,
-        },
-    }), 200
+    return jsonify(
+        {
+            "contents": {
+                "feedback": total_content_feedback,
+                "no_feedback": total_content - total_content_feedback,
+                "type_feedback": type_feedback,
+            },
+            "users": {"total": total_users, "growth": True, "value": "0.0%"},
+            "links": {
+                "total": total_links,
+                "growth": links_grown > 0,
+                "value": str(abs(round(links_grown * 100, 2))) + "%",
+                "per_months": links_months,
+                "data": links_data,
+            },
+            "answers": {
+                "total": total_answers,
+                "growth": answers_grown > 0,
+                "value": str(abs(round(answers_grown * 100, 2))) + "%",
+                "per_months": answers_months,
+            },
+            "pending": {
+                "total": total_pending,
+            },
+        }
+    ), 200
 
 
-@app.post('/api/model/test')
+@app.post("/api/model/test")
 def test_model():
     # API_URL = "https://api-inference.huggingface.co/models/PB7-DUT-2023/finetuned_Bloomz_1b1_v1"
     # headers = {"Authorization": "Bearer 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"}
@@ -475,20 +501,19 @@ def format_question_answers(question, answers):
         try:
             # Use ast.literal_eval for safer string to list conversion
             import ast
+
             answer_list = ast.literal_eval(answers)
         except:
             # Fallback to simple string splitting if ast.literal_eval fails
-            answer_list = answers.strip('[]').replace("'", "").split(', ')
-    
+            answer_list = answers.strip("[]").replace("'", "").split(", ")
+
     # Combine question and answers with a single space
-    result = "{} {}".format(
-        question,
-        ' '.join(answer_list)
-    )
-    
+    result = "{} {}".format(question, " ".join(answer_list))
+
     return result
 
-@app.post('/api/customer/question')
+
+@app.post("/api/customer/question")
 def generate_question_customer():
     data = request.json
     try:
@@ -509,15 +534,16 @@ def generate_question_customer():
         #         "message": "Waiting for loading model, but you can search the answer {top_k} "
         #     }), 400
         print(top_k)
-        return jsonify({
-            "top_k": top_k
-        }), 200
+        return jsonify({"top_k": top_k}), 200
     except ValueError as e:
-        return jsonify({
-            "message": e,
-        }), 400
-    
-@app.post('/api/customer/graph')
+        return jsonify(
+            {
+                "message": e,
+            }
+        ), 400
+
+
+@app.post("/api/customer/graph")
 def generate_graph():
     data = request.json
     graph = ""
@@ -525,66 +551,84 @@ def generate_graph():
         graph = create_graph_by_lessons(data["dataset"], data["grade"], data["lesson"])
         if graph:
             print(graph)
-            return jsonify({
-                "graph": graph,
-                # "message": f"Graph showed!!"
-            }), 200
+            return jsonify(
+                {
+                    "graph": graph,
+                    # "message": f"Graph showed!!"
+                }
+            ), 200
     except ValueError as e:
-        return jsonify({
-            "message": e,
-        }), 400
-        
-@app.post('/api/user/question')
+        return jsonify(
+            {
+                "message": e,
+            }
+        ), 400
+
+
+@app.post("/api/user/question")
 @jwt_required()
 def generate_question_user():
     current_user = get_jwt_identity()
     data = request.json
     try:
         success, answer_part, explain_part = model_api(
-            data["question"], data["answers"], data["version"])
+            data["question"], data["answers"], data["version"]
+        )
         top_k = get_top_k(data["question"], 15)
         print(top_k)
         if success == True:
-            conversation = Conversations(
-                current_user["_id"], [], data["question"])
+            conversation = Conversations(current_user["_id"], [], data["question"])
 
-            if (data["conversationId"] != ""):
-                print('here')
+            if data["conversationId"] != "":
+                print("here")
                 conversation.find_by_id(data["conversationId"])
             else:
                 conversation.save_to_db()
 
             contentId = conversation.contents
-            ask = Contents(conversation._id, "ask",
-                           data["question"], data["answers"])
+            ask = Contents(conversation._id, "ask", data["question"], data["answers"])
             ask.save_to_db()
             contentId.append(ask._id)
-            respone = Contents(conversation._id, "answer",
-                               data["question"], data["answers"], explain_part, answer_part,version=data["version"], top_k=top_k)
+            respone = Contents(
+                conversation._id,
+                "answer",
+                data["question"],
+                data["answers"],
+                explain_part,
+                answer_part,
+                version=data["version"],
+                top_k=top_k,
+            )
             respone.save_to_db()
             contentId.append(respone._id)
             conversation.contents = contentId
             conversation.save_to_db()
 
-            return jsonify({
-                "correct_answer": answer_part,
-                "explanation": explain_part,
-                "conversation_id": conversation._id,
-                "answer_id": respone._id,
-                "top_k": top_k
-            })
+            return jsonify(
+                {
+                    "correct_answer": answer_part,
+                    "explanation": explain_part,
+                    "conversation_id": conversation._id,
+                    "answer_id": respone._id,
+                    "top_k": top_k,
+                }
+            )
         else:
-            [grade, lesson] = top_k.split('_')
-            return jsonify({
-                "message": f"Waiting for loading model, but you can search the answer in history book grade {grade} lesson {lesson}"
-            }), 400
+            [grade, lesson] = top_k.split("_")
+            return jsonify(
+                {
+                    "message": f"Waiting for loading model, but you can search the answer in history book grade {grade} lesson {lesson}"
+                }
+            ), 400
     except ValueError as e:
-        return jsonify({
-            "message": e,
-        }), 400
+        return jsonify(
+            {
+                "message": e,
+            }
+        ), 400
 
 
-@app.get('/api/user/conversation')
+@app.get("/api/user/conversation")
 @jwt_required()
 def get_user_conversation():
     current_user = get_jwt_identity()
@@ -595,7 +639,7 @@ def get_user_conversation():
     return jsonify(res), 200
 
 
-@app.get('/api/user/conversation/<id>')
+@app.get("/api/user/conversation/<id>")
 @jwt_required()
 def get_conversation_content(id):
     conversation = Conversations()
@@ -609,21 +653,19 @@ def get_conversation_content(id):
     return jsonify(data), 200
 
 
-@app.get('/api/admin/users')
+@app.get("/api/admin/users")
 @jwt_required()
 def admin_get_list_user():
     user = Users()
     current_user = get_jwt_identity()
-    if (current_user["role"] == 2):
+    if current_user["role"] == 2:
         res = user.get_all_user()
         return jsonify(res), 200
     else:
-        return jsonify({
-            "message": "You don't have permission to do this action."
-        }), 403
+        return jsonify({"message": "You don't have permission to do this action."}), 403
 
 
-@app.post('/api/user/content/<id>/rate')
+@app.post("/api/user/content/<id>/rate")
 @jwt_required()
 def rate_content(id):
     content = Contents()
@@ -631,18 +673,18 @@ def rate_content(id):
     data = request.json
 
     content.bad_response = True
-    content.feedback = data['feedback']
+    content.feedback = data["feedback"]
 
     content.save_to_db()
-    return jsonify({
-        "message": "Thank you for your feedback"
-    }), 200
+    return jsonify({"message": "Thank you for your feedback"}), 200
 
 
 if __name__ == "__main__":
+    with open("pid_backend", "w", encoding="utf-8") as f:
+        f.write(str(os.getpid()))
     schedule.every(1).minutes.do(my_job)
 
     schedule_t = threading.Thread(target=schedule_thread)
     schedule_t.start()
 
-    app.run(debug=False, port=3001, host='0.0.0.0')
+    app.run(debug=False, port=3001, host="0.0.0.0")

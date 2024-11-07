@@ -1,0 +1,25 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          script: |
+            cd /root/code/PBL7_Backend
+            git pull
+            if [ -f pid_backend ]; then
+              kill -9 $(cat pid_backend)
+              rm pid_backend
+            fi
+            nohup /root/miniconda3/envs/pbl7/bin/python app.py &
