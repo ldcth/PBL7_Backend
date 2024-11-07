@@ -680,6 +680,8 @@ def rate_content(id):
 
 
 if __name__ == "__main__":
+    if not os.path.exists("static"):
+        os.mkdir("static")
     with open("pid_backend", "w", encoding="utf-8") as f:
         f.write(str(os.getpid()))
     schedule.every(1).minutes.do(my_job)
