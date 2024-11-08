@@ -29,7 +29,8 @@ def model_api(question, answers, version=1):
     # API_URL = "https://x9p9u1p794crk2ph.us-east-1.aws.endpoints.huggingface.cloud"
     API_URL = ""
     if (version == 1):
-        API_URL = "https://btjecpsw9w4zs50z.us-east-1.aws.endpoints.huggingface.cloud"
+        # API_URL = "https://btjecpsw9w4zs50z.us-east-1.aws.endpoints.huggingface.cloud"
+        API_URL = "https://c3fstdbsvvfdw5kj.us-east-1.aws.endpoints.huggingface.cloud"
 
     if (version == 2):
         API_URL = "https://x9p9u1p794crk2ph.us-east-1.aws.endpoints.huggingface.cloud"
@@ -39,7 +40,7 @@ def model_api(question, answers, version=1):
 
     headers = {
         "Accept": "application/json",
-        "Authorization": "Bearer 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",
+        "Authorization": "Bearer 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",
         "Content-Type": "application/json"
     }
 

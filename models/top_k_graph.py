@@ -18,6 +18,15 @@ def load_data():
     df_dataset_nodes = dataset_nodes['train'].to_pandas()
     return df_dataset_edges, df_dataset_nodes
 
+def load_data_qwen():
+    notebook_login("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")
+    dataset_edges = load_dataset(
+        "ductho263/final_keywords_edges_data")
+    df_dataset_edges = dataset_edges['train'].to_pandas()
+    dataset_nodes = load_dataset(
+        "ductho263/final_nodes_data")
+    df_dataset_nodes = dataset_nodes['train'].to_pandas()
+    return df_dataset_edges, df_dataset_nodes
 # Hàm làm sạch cho cột 'nội dung liên kết' và 'keyword'
 def formatting_func_mcqa_gen(example):
     # Remove sentences containing specific phrases from the explanation
@@ -130,13 +139,11 @@ def calculate_relevance_score_A(keyword, keywords_A):
         return -1
 def find_most_relevant_doc(df_nodes, df_edges, df_question, top_n=5):
     # Chuyển đổi keyword thành danh sách để dễ dàng kiểm tra sự xuất hiện
-    print(df_question)
     keywords_Q = df_question[df_question['id'].str.startswith('Q')]['keyword'].tolist()
     keywords_A = df_question[df_question['id'].str.startswith('A')]['keyword'].tolist()
     print(keywords_Q)
     print(keywords_A)
     if 'null' not in keywords_Q and 'null' not in keywords_A and len(keywords_Q) != 0 and len(keywords_A)!= 0:
-        print('ok')
         # Sử dụng defaultdict để lưu điểm cho mỗi id bài
         relevance_score = defaultdict(int)
         # Đếm số lần xuất hiện của keywords trong df_nodes
@@ -172,9 +179,9 @@ def find_most_relevant_doc(df_nodes, df_edges, df_question, top_n=5):
         top_relevant_docs = []
     return top_relevant_docs
 
-def get_top_k_graph(question):
+def get_top_k_graph(question,refType):
     # question = "Bộ máy hành chính giúp việc cho vua ở các quốc gia cổ đại phương Đônggồm A.nông dân công xã và quý tộc. B.các tầng lớp trong xã hội. C.toàn quý tộc. D.toàn tăng lữ."
-    df_edges, df_nodes  = load_data()
+    df_edges, df_nodes  = load_data() if refType == "L" else load_data_qwen()
     # question_text = formatting_func_mcqa_doc_id(question)
     question_text = question
     result = get_extracted_keywords(question_text)

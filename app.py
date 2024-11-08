@@ -518,23 +518,24 @@ def generate_question_customer():
     data = request.json
     try:
         formatted_question = format_question_answers(data["question"], data["answers"])
-        # success, answer_part, explain_part = model_api(
-        #     data["question"], data["answers"], data["version"])
-        top_k = get_top_k_graph(formatted_question)
-        # if success == True:
-        #     return jsonify({
-        #         "correct_answer": answer_part,
-        #         "explanation": explain_part,
-        #         "top_k": top_k
-        #     })
-        # else:
-        #     # [grade, lesson] = top_k.split('_')
-        #     return jsonify({
-        #         # "message": f"Waiting for loading model, but you can search the answer in history book grade {grade} lesson {lesson}"
-        #         "message": "Waiting for loading model, but you can search the answer {top_k} "
-        #     }), 400
-        print(top_k)
-        return jsonify({"top_k": top_k}), 200
+        success, answer_part, explain_part = model_api(
+            data["question"], data["answers"], data["version"])
+        top_k = get_top_k_graph(formatted_question,data["refType"])
+        if success == True:
+            return jsonify({
+                "correct_answer": answer_part,
+                "explanation": explain_part,
+                "top_k": top_k
+            })
+        else:
+            # [grade, lesson] = top_k.split('_')
+            return jsonify({
+                "correct_answer": "",
+                "explanation": "",
+                "top_k": top_k
+            })
+        # print(top_k)
+        # return jsonify({"top_k": top_k}), 200
     except ValueError as e:
         return jsonify(
             {
