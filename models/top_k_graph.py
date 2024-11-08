@@ -86,7 +86,7 @@ def get_extracted_keywords(question):
     "{question}"
 
     Hãy trích xuất các thực thể trong câu hỏi trắc nghiệm, tối đa 3 thực thể ở trong câu hỏi và 2 thực thể ở mỗi đáp án trắc nghiệm.
-    Nếu câu hỏi không phải là câu hỏi trắc nghiệm học thuật về môn lịch sử hay các từ không có nghĩa thì mặc định trả về 'null'"""
+    Nếu nội dung câu hỏi trắc nghiệm không về nội dung học thuật môn lịch sử và các nội dung vô nghĩa thì mặc định trả về 'null'"""
 
     XAI_API_KEY = key
     client = OpenAI(
@@ -151,7 +151,15 @@ def find_most_relevant_doc(df_nodes, df_edges, df_question, top_n=5):
     keywords_A = df_question[df_question['id'].str.startswith('A')]['keyword'].tolist()
     print(keywords_Q)
     print(keywords_A)
-    if 'null' not in keywords_Q and 'null' not in keywords_A and len(keywords_Q) != 0 and len(keywords_A)!= 0 and len(keywords_Q) > 1 and len(keywords_A) > 3:
+    # Count number of 'null' values in both lists
+    null_count_Q = keywords_Q.count('null')
+    null_count_A = keywords_A.count('null')
+    
+    # Check if null count is less than 50% of list length for both lists
+    is_valid_Q = null_count_Q < len(keywords_Q) * 0.5
+    is_valid_A = null_count_A < len(keywords_A) * 0.5
+    
+    if is_valid_Q and is_valid_A and len(keywords_Q) != 0 and len(keywords_A) != 0 and len(keywords_Q) > 1 and len(keywords_A) > 3:
         print("ok check")
         # Sử dụng defaultdict để lưu điểm cho mỗi id bài
         relevance_score = defaultdict(int)
