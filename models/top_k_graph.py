@@ -86,7 +86,7 @@ def get_extracted_keywords(question):
     "{question}"
 
     Hãy trích xuất các thực thể trong câu hỏi trắc nghiệm, tối đa 3 thực thể ở trong câu hỏi và 2 thực thể ở mỗi đáp án trắc nghiệm.
-    Nếu câu hỏi không phải là câu hỏi trắc nghiệm về lịch sử hay các từ không có nghĩa thì mặc định trả về 'null'"""
+    Nếu câu hỏi không phải là câu hỏi trắc nghiệm học thuật về môn lịch sử hay các từ không có nghĩa thì mặc định trả về 'null'"""
 
     XAI_API_KEY = key
     client = OpenAI(
@@ -107,58 +107,63 @@ def get_extracted_keywords(question):
 from collections import defaultdict
 
 def calculate_relevance_score_Q(keyword, keywords_Q):
-    len_Q = len(keywords_Q)
-
-    # Kiểm tra xem từ khóa có nằm trong danh sách từ khóa nào không
-    if keyword in keywords_Q:
-        if len_Q > 0:  # Đảm bảo không chia cho 0
-            ratio = len(keyword) / len_Q
-            if ratio ==1:
-                return 4
-            elif ratio > 0.2:
-                return 1
-            else:
-                return 0
-    else:
-        return -1
+    # Tìm từ dài nhất trong keywords_A mà chứa keyword
+    matching_keywords = [k for k in keywords_Q if keyword in k or k in keyword]
+    
+    if matching_keywords:
+        # Lấy từ dài nhất trong các từ khớp
+        longest_match = max(matching_keywords, key=len)
+        # Tính tỉ lệ độ dài
+        ratio = min(len(keyword), len(longest_match)) / max(len(keyword), len(longest_match)) * 100
+        
+        if ratio == 100:  # Khớp hoàn toàn
+            return 4
+        elif ratio > 50:  # Khớp hơn 50%
+            return 2
+        elif ratio > 30:  # Khớp một phần nhỏ
+            return 1
+        else:
+            return 0
+    return 0
 
 def calculate_relevance_score_A(keyword, keywords_A):
-    len_Q = len(keywords_A)
-
-    # Kiểm tra xem từ khóa có nằm trong danh sách từ khóa nào không
-    if keyword in keywords_A:
-        if len_Q > 0:  # Đảm bảo không chia cho 0
-            ratio = len(keyword) / len_Q
-            if ratio ==1:
-                return 4
-            elif ratio > 0.2:
-                return 1
-            else:
-                return 0
-    else:
-        return -1
+    # Tìm từ dài nhất trong keywords_A mà chứa keyword
+    matching_keywords = [k for k in keywords_A if keyword in k or k in keyword]
+    
+    if matching_keywords:
+        # Lấy từ dài nhất trong các từ khớp
+        longest_match = max(matching_keywords, key=len)
+        # Tính tỉ lệ độ dài
+        ratio = min(len(keyword), len(longest_match)) / max(len(keyword), len(longest_match)) * 100
+        
+        if ratio == 100:  # Khớp hoàn toàn
+            return 4
+        elif ratio > 50:  # Khớp hơn 50%
+            return 2
+        elif ratio > 30:  # Khớp một phần nhỏ
+            return 1
+        else:
+            return 0
+    return 0
 def find_most_relevant_doc(df_nodes, df_edges, df_question, top_n=5):
     # Chuyển đổi keyword thành danh sách để dễ dàng kiểm tra sự xuất hiện
     keywords_Q = df_question[df_question['id'].str.startswith('Q')]['keyword'].tolist()
     keywords_A = df_question[df_question['id'].str.startswith('A')]['keyword'].tolist()
     print(keywords_Q)
     print(keywords_A)
-    if 'null' not in keywords_Q and 'null' not in keywords_A and len(keywords_Q) != 0 and len(keywords_A)!= 0:
+    if 'null' not in keywords_Q and 'null' not in keywords_A and len(keywords_Q) != 0 and len(keywords_A)!= 0 and len(keywords_Q) > 1 and len(keywords_A) > 3:
+        print("ok check")
         # Sử dụng defaultdict để lưu điểm cho mỗi id bài
         relevance_score = defaultdict(int)
         # Đếm số lần xuất hiện của keywords trong df_nodes
         for index, row in df_nodes.iterrows():
             doc_base = row['id_doc'].rsplit('_', 1)[0] + '_'
-            if calculate_relevance_score_Q(row['keyword'], keywords_Q) == -1:
-                relevance_score[doc_base]  = 0
-            elif calculate_relevance_score_A(row['keyword'], keywords_A) == -1:
-                relevance_score[doc_base]  = 0
-            else: 
-                relevance_score[doc_base] += calculate_relevance_score_Q(row['keyword'], keywords_Q)
-                relevance_score[doc_base] += calculate_relevance_score_A(row['keyword'], keywords_A)
-    # Đếm số lần xuất hiện của keywords trong df_edges và kiểm tra liên kết giữa Q và A
+            
+            relevance_score[doc_base] += calculate_relevance_score_Q(row['keyword'], keywords_Q)
+            #relevance_score[doc_base] += calculate_relevance_score_A(row['keyword'], keywords_A)
+# Đếm số lần xuất hiện của keywords trong df_edges và kiểm tra liên kết giữa Q và A
         
-        if relevance_score[doc_base] != 0:
+        if relevance_score[doc_base] > 0:
             for index, row in df_edges.iterrows():
                 doc_base = row['id_doc'].rsplit('_', 1)[0] + '_'
                 if row['keyword_head'] in keywords_Q and row['keyword_tail'] in keywords_A:
@@ -170,8 +175,13 @@ def find_most_relevant_doc(df_nodes, df_edges, df_question, top_n=5):
                 elif row['keyword_head'] in keywords_A or row['keyword_tail'] in keywords_A:
                     relevance_score[doc_base] += 2
 
-        # Sắp xếp các bài theo điểm từ cao đến thấp và lấy top N id_doc
-        top_relevant_docs = [doc[0].rstrip('_') for doc in sorted(relevance_score.items(), key=lambda x: x[1], reverse=True)[:top_n]]
+        # Sắp xếp và lọc các tài liệu có điểm > 0
+        sorted_docs = sorted(relevance_score.items(), key=lambda x: x[1], reverse=True)
+        print(sorted_docs)
+        filtered_docs = [doc for doc in sorted_docs if doc[1] > 0]
+        print(filtered_docs)
+        top_relevant_docs = [doc[0].rstrip('_') for doc in filtered_docs[:top_n]]
+        print(top_relevant_docs)
     else:
         print('null')
         top_relevant_docs = []
