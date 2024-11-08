@@ -61,13 +61,41 @@ def create_graph_by_lessons(dataset, grade, lesson):
             G.add_edge(lesson_node, node_2, title=f"Trong bài {lesson_id}", weight=2)
     else:
         # Xử lý input của bài học, hỗ trợ nhập dạng '10-15' hoặc '10 13 15'
-        lessons = []
-        if '-' in lesson:
-            start, end = map(int, lesson.split('-'))
-            lessons = [str(i) for i in range(start, end + 1)]
+        lessons = set()
+            # Tối đa số bài học theo lớp
+        max_lessons = {
+            "10": 40,
+            "11": 24,
+            "12": 25
+        }
+                # Kiểm tra xem lớp có trong danh sách không và lấy số bài tối đa
+        if grade in max_lessons:
+            max_lesson = max_lessons[grade]
         else:
-            lessons = lesson.split()
-
+            print("Lớp không tồn tại.")
+            return None  # Trả về None nếu lớp không tồn tại trong danh sách
+        # Tách từng phần của đầu vào bởi dấu phẩy
+        parts = lesson.split(',')
+        
+        for part in parts:
+            # Kiểm tra xem phần này có dạng "a-b" không
+            if '-' in part:
+                start, end = map(int, part.split('-'))
+                if start > end or end > max_lesson:
+                    print(f"Lỗi: Bài {part} vượt quá số bài tối đa của lớp {grade} ({max_lesson} bài).")
+                    return None  # Trả về None nếu số bắt đầu lớn hơn số kết thúc hoặc vượt quá giới hạn
+                lessons.update(range(start, end + 1))
+            # Kiểm tra xem phần này có phải là một số lẻ không
+            elif part.isdigit():
+                lesson_num = int(part)
+                if lesson_num > max_lesson:
+                    print(f"Lỗi: Bài {lesson_num} vượt quá số bài tối đa của lớp {grade} ({max_lesson} bài).")
+                    return None  # Trả về None nếu số bài vượt quá giới hạn
+                lessons.add(lesson_num)
+            else:
+                print("Lỗi: Đầu vào không hợp lệ.")
+                return None  # Trả về None nếu đầu vào không hợp lệ
+            
         # Duyệt qua từng bài học trong danh sách
         for lesson in lessons:
             # Tạo node cha đại diện cho bài

@@ -558,6 +558,10 @@ def generate_graph():
                     # "message": f"Graph showed!!"
                 }
             ), 200
+        else:
+            return jsonify({
+                "message": f"Something went wrong with input!"
+            }), 400
     except ValueError as e:
         return jsonify(
             {
